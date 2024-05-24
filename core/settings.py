@@ -9,9 +9,7 @@ https://docs.djangoproject.com/en/3.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
-
 import os
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -20,7 +18,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '=b-r)*cz9)-okwk(!mm^lohn^10=y^w+thj!(xh-7e*myc*1va'
+SECRET_KEY = 'a1+@0vl7f^*kyna2*3gwn%c-wvdo+c#_zc6xsakr$p*alnb%kj'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
