@@ -5,8 +5,22 @@ from django.urls import re_path
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from rest_framework import routers
+from server import views
+# Server Urls end endpoints
+
+router = routers.DefaultRouter()
+# router.register(
+#     r'api', views., basename='allproducts'
+# )
+# router.register(r'api/server/select/(?P<category>[^/.]+)', views.ServerListView,
+#                 basename='server_category')
+
+router.register(r'api/server/select', views.ServerListView,
+                basename='server_category')
 
 
+# Drf Ysag Views For api Documentation
 schema_view = get_schema_view(
     openapi.Info(
         title="ChattApp Api ",
@@ -27,8 +41,8 @@ urlpatterns = [
          name='schema-json'),
     path('api/api.json/', schema_view.without_ui(
          cache_timeout=0), name='schema-swagger-ui-no'),
-    path('', schema_view.with_ui('swagger',
+    path('api/', schema_view.with_ui('swagger',
          cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc',
          cache_timeout=0), name='schema-redoc'),
-]
+]+router.urls
