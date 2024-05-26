@@ -4,22 +4,23 @@ from .models import (Category, Server)
 from rest_framework.response import Response
 from .serializer import (CategorySeralizer, ServerSeralizer, ChnnelSeralizer)
 from django.db.models import Count
+from drf_yasg.openapi import Schema
 # Create your views here.
 
 
 #  DOC  STRING
-""" 
+
+
+class ServerListView(viewsets.ViewSet):
+    """ 
 this Class is end end point for 
 filtring servers by category 
-
 
 Keyword arguments: category
 argument -- specific category 
 Return: list of server associated with specfic category 
-"""
+    """
 
-
-class ServerListView(viewsets.ViewSet):
     queryset = Server.objects.all()
 
     def list(self, request):
@@ -30,6 +31,7 @@ class ServerListView(viewsets.ViewSet):
         with_num_members = request.GET.get('subcriper')
 
         print('category', category)
+        #  retriving server based on server id given
         if by_user or server_id and not request.user.is_authenticated:
             raise exceptions.AuthenticationFailed()
         if category:
