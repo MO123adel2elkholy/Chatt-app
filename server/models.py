@@ -54,7 +54,7 @@ class Category(models.Model):
     argument -- description
     Return: deleted 
     """
-
+    
     @receiver(models.signals.pre_delete, sender='server.Category')
     def category_delete_files(sender, instance,  **kwargs):
         for filed in instance._meta.fields:
@@ -123,7 +123,6 @@ class Chnnel(models.Model):
     )
     server = models.ForeignKey(
         Server, on_delete=models.CASCADE, related_name='channels')
-    """
     icon = models.ImageField(
         upload_to=channel_icon_upload_path,
         blank=True,
@@ -132,7 +131,7 @@ class Chnnel(models.Model):
         upload_to=channel_banner_upload_path,
         blank=True,
         null=True)
-    """
+    
 
     class Meta:
         verbose_name = _("Channel")
@@ -142,7 +141,7 @@ class Chnnel(models.Model):
         return self.name
 
         #  replacing old icon with new one
-    """
+    
     def save(self, *args, **kwargs):
         self.name = self.name.lower()
         if self.id:
@@ -152,11 +151,11 @@ class Chnnel(models.Model):
             if  exsisting.banner != self.banner:
                 exsisting.banner.delete(save=False)
         super(Category, self).save(*args, **kwargs)
-     make sure if we deleted the chnnel  we delete images assoxiated with it 
+    """make sure if we deleted the chnnel  we delete images assoxiated with it 
     
     Keyword arguments: 
     argument -- description
-    Return: deleted 
+    Return: deleted """
     
     @receiver(models.signals.pre_delete, sender='server.Server')
     def chnnels_delete_files(sender, instance,  **kwargs):
@@ -168,4 +167,3 @@ class Chnnel(models.Model):
 
     def get_absolute_url(self):
         return reverse("Channel_detail", kwargs={"pk": self.pk})
-    """
