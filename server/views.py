@@ -1,16 +1,15 @@
 from django.shortcuts import render
 from rest_framework import viewsets, exceptions
-from .models import (Category, Server)
 from rest_framework.response import Response
-from .serializer import (CategorySeralizer, ServerSeralizer, ChnnelSeralizer)
 from django.db.models import Count
-from drf_yasg.openapi import Schema
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
-# Create your views here.
 
-
-#  DOC  STRING
+from .models import Server
+from .serializer import ServerSeralizer
+from .schema import (
+    server_list_schema,
+    SERVER_LIST_QUERY_PARAMETERS,
+    SERVER_LIST_RESPONSES,
+)
 
 
 class ServerListView(viewsets.ViewSet):
@@ -34,73 +33,38 @@ class ServerListView(viewsets.ViewSet):
     """
     queryset = Server.objects.all()
 
-    @swagger_auto_schema(
+    @server_list_schema(
         operation_summary="List servers",
         operation_description="Return servers filtered by category, user membership, ID, or quantity.",
-        manual_parameters=[
-            openapi.Parameter(
-                'category',
-                openapi.IN_QUERY,
-                description="Filter servers by category name",
-                type=openapi.TYPE_STRING
-            ),
-            openapi.Parameter(
-                'by_user',
-                openapi.IN_QUERY,
-                description="Return only servers joined by the authenticated user",
-                type=openapi.TYPE_BOOLEAN
-            ),
-            openapi.Parameter(
-                'qty',
-                openapi.IN_QUERY,
-                description="Limit the number of results returned",
-                type=openapi.TYPE_INTEGER
-            ),
-            openapi.Parameter(
-                'server_id',
-                openapi.IN_QUERY,
-                description="Get a specific server by ID",
-                type=openapi.TYPE_INTEGER
-            ),
-            openapi.Parameter(
-                'subcriper',
-                openapi.IN_QUERY,
-                description="Include the number of members for each server",
-                type=openapi.TYPE_BOOLEAN
-            ),
-        ],
-        responses={
-            200: "Successful response",
-            401: "Authentication required",
-            400: "Invalid request"
-        }
+        manual_parameters=SERVER_LIST_QUERY_PARAMETERS,
+        responses=SERVER_LIST_RESPONSES,
     )
     def list(self, request):
         category = request.GET.get('category')
         by_user = request.GET.get('by_user') == 'true'
         quaintity = request.GET.get('qty')
         server_id = request.GET.get('server_id')
-        with_num_members = request.GET.get('subcriper')== 'true'
+        with_num_members = request.GET.get('subcriper') == 'true'
 
-        print('category', category)
-        #  retriving server based on server id given
-        if by_user or server_id and not request.user.is_authenticated:
+        queryset = self.queryset
+
+        if (by_user or server_id) and not request.user.is_authenticated:
             raise exceptions.AuthenticationFailed()
+
         if category:
-            # self.queryset = self.queryset.filter(category=category)
-            self.queryset = self.queryset.filter(category__name=category)
-            print('Servers ', self.queryset)
+            queryset = queryset.filter(category__name=category)
+
         if by_user:
             user_id = request.user.id
-            print(user_id, ' <= id ')
-            self.queryset = self.queryset.filter(members=user_id)
+            queryset = queryset.filter(members=user_id)
+
         if quaintity:
-            self.queryset = self.queryset[:int(quaintity)]
+            queryset = queryset[:int(quaintity)]
+
         if server_id:
-            print('server Id  ', server_id)
             try:
-                self.queryset = self.queryset.filter(id=server_id)
-                if not self.queryset.exists():
+                queryset = queryset.filter(id=server_id)
+                if not queryset.exists():
                     raise exceptions.ValidationError(
                         detail=f' server with this  id  {server_id} Dosnot exist '
                     )
@@ -108,14 +72,15 @@ class ServerListView(viewsets.ViewSet):
                 raise exceptions.ValidationError(
                     detail=f' server with this  id  {server_id} Dosnot exist '
                 )
+
         if with_num_members:
-            self.queryset = self.queryset.annotate(subscriper=Count("members"))
-            print(self.queryset)
-        print('subcriper ==> ', self.queryset[0])
-        serializer = ServerSeralizer(self.queryset, many=True, context={
+            queryset = queryset.annotate(subscriper=Count("members"))
+
+        serializer = ServerSeralizer(queryset, many=True, context={
             'subscriper': with_num_members
         })
-        return Response(
-            {'success': True,
-             'data': serializer.data}
-        )
+
+        return Response({
+            'success': True,
+            'data': serializer.data
+        })
