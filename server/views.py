@@ -14,9 +14,10 @@ from drf_yasg.openapi import Schema
 class ServerListView(viewsets.ViewSet):
     """ 
 this Class is end end point for 
-filtring servers by category 
+filtring servers by category , servr id , by user and with number of members 
 
-Keyword arguments: category
+Keyword arguments: category , by_user , server_id , qty , subcriper
+    
 argument -- specific category 
 Return: list of server associated with specfic category 
     """
@@ -28,7 +29,7 @@ Return: list of server associated with specfic category
         by_user = request.GET.get('by_user') == 'true'
         quaintity = request.GET.get('qty')
         server_id = request.GET.get('server_id')
-        with_num_members = request.GET.get('subcriper')
+        with_num_members = request.GET.get('subcriper')== 'true'
 
         print('category', category)
         #  retriving server based on server id given
@@ -48,19 +49,17 @@ Return: list of server associated with specfic category
             print('server Id  ', server_id)
             try:
                 self.queryset = self.queryset.filter(id=server_id)
-                print('Your Servers ===>', self.queryset)
                 if not self.queryset.exists():
                     raise exceptions.ValidationError(
                         detail=f' server with this  id  {server_id} Dosnot exist '
                     )
             except ValueError:
                 raise exceptions.ValidationError(
-                    detail=f' server with this  id  {server_id} Dosnot exist ')
-            if with_num_members:
-                self.queryset = self.queryset.annotate(
-                    subscriper=Count("members")
+                    detail=f' server with this  id  {server_id} Dosnot exist '
                 )
-                print(self.queryset)
+        if with_num_members:
+            self.queryset = self.queryset.annotate(subscriper=Count("members"))
+            print(self.queryset)
         print('subcriper ==> ', self.queryset[0])
         serializer = ServerSeralizer(self.queryset, many=True, context={
             'subscriper': with_num_members

@@ -23,15 +23,10 @@ class ServerSeralizer(serializers.ModelSerializer):
         exclude = ("members",)
 
     def get_subscriper(self, obj):
-        if hasattr(obj, 'subscriper'):
-            return obj.subscriper
-        return None
-    #  this methode for returning data if it required or not
+        return getattr(obj, 'subscriper', None)
 
     def to_representation(self, instance):
-
         data = super().to_representation(instance)
-        subscriper = self.context.get('subscriper')
-        if not subscriper:
-            data.pop(' ', None)
-            return data
+        if not self.context.get('subscriper', False):
+            data.pop('subscriper', None)
+        return data
